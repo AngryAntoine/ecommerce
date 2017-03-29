@@ -2,14 +2,15 @@
 
 {% block content %}
 
-<table class="table">
-{% for object in object_list %}
-    <tr>
-        <td>
-            {{ object.title}}
-        </td>
-    </tr>
+<h2>All products <small><a href="{% url 'categories:categories' %}">Categories</a></small></h2>
+
+<div class="row">
+{% for product in object_list %}
+  <div class="col-xs-3">
+      {% include 'products/product_thumbnail.html' with product=product price='True' %}
+  </div>
+  {% cycle '' '' '' '</div><div class="row">' %}
 {% endfor %}
-</table>
+</div>
 
 {% endblock content %}

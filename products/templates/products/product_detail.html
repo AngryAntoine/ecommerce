@@ -1,8 +1,78 @@
 {% extends 'base.html' %}
+<script>
+{% block jquery %}
+  function setPrice(){
+    var price = $('.variation_select option:selected').attr('data-price');
+    var sale_price = $('.variation_select option:selected').attr('data-sale-price');
+    if (sale_price != 'None' && sale_price != '' && sale_price != null){
+      $('#price').html('<h3>'+'Sale price: $'+sale_price+'<small class="original-price">'+' Original Price: $'+price+'</small>'+'</h3>');
+    } else {
+      $('#price').html('Price: $'+price);
+    }
+  }
+  setPrice();
+  $('.variation_select').change(function(){
+    setPrice()
+  });
+{% endblock jquery %}
+</script>
 
 {% block content %}
-
-{{ object.title }}
-
-
+<div class="row">
+  <div class="col-sm-8">
+    <h2>{{ object.title }}</h2>
+    {% if object.get_image_url %}
+        <div>
+            <img src="{{ object.get_image_url }}" alt="" class="img-responsive">
+        </div>
+    {% endif %}
+    <p class="lead">
+        {{ object.description }}
+    </p>
+  </div>
+  <!-- Product Sidebar -->
+  <div class="col-sm-4">
+    {% if object.variation_set.count > 1 %}
+        <h3 id="price">{{ object.variation_set.first.price }}</h3>
+        <select class="form-control variation_select">
+            {% for vari_obj in object.variation_set.all %}
+                <option data-sale-price="{{ vari_obj.sale_price}}" data-price="{{ vari_obj.price }}" value="{{ vari_obj.id }}">
+                    {{ vari_obj }}
+                </option>
+            {% endfor %}
+        </select>
+    {% else %}
+      <h3>{% if object.variation_set.first.sale_price %}
+          Sale price: ${{ object.variation_set.first.sale_price }}
+          <small class="original-price">Original price $: {{ object.variation_set.first.price }}</small>
+        {% else %}
+          Price: ${{ object.variation_set.first.price }}
+        {% endif %}
+      </h3>
+    {% endif %}
+    <br>
+    <a href="#">Add to cart</a>
+    <br>
+    <hr>
+    <p>
+      Share
+      <br>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+        <i class="fa fa-facebook-official fa-3x" aria-hidden="true"></i>
+      </a>
+      <a href="https://twitter.com/home?status={{ request.build_absolute_uri }}">
+        <i class="fa fa-twitter-square fa-3x" aria-hidden="true"></i>
+      </a>
+    </p>
+    <h4>Related Products</h4>
+      <div class="row">
+      {% for product in related %}
+        <div class="col-xs-6">
+          {% include 'products/product_thumbnail.html' with product=product price='True' %}
+        </div>
+        {% cycle '' '</div><div class="row">' %}
+      {% endfor %}
+  </div>
+  <!-- End Product Sidebar -->
+</div>
 {% endblock content %}
